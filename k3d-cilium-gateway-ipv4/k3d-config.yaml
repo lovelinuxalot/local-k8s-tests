@@ -1,0 +1,57 @@
+apiVersion: k3d.io/v1alpha5
+kind: Simple
+metadata:
+  name: cilium-cluster
+servers: 1
+agents: 2
+image: docker.io/rancher/k3s:v1.25.7-k3s1
+kubeAPI:
+  hostIP: 127.172.50.1
+  hostPort: "6443"
+network: cilium
+token: Ciliumk3d1
+volumes:
+  - volume: ./k3d-entrypoint-cilium.sh:/bin/k3d-entrypoint-cilium.sh
+    nodeFilters:
+    - all
+options:
+  k3d:
+    wait: true
+    timeout: "6m0s"
+    disableLoadbalancer: true
+    disableImageVolume: false
+    disableRollback: false
+  k3s: # options passed on to K3s itself
+    nodeLabels:
+      - label: bgp_enabled=true
+        nodeFilters:
+          - server:*
+          - agent:*
+    extraArgs:
+      - arg: --tls-san=127.0.0.1
+        nodeFilters:
+          - server:*
+      - arg: --disable=servicelb
+        nodeFilters:
+        - server:*
+      - arg: --disable=traefik
+        nodeFilters:
+        - server:*
+      - arg: --disable-network-policy
+        nodeFilters:
+          - server:*
+      - arg: --flannel-backend=none
+        nodeFilters:
+          - server:*
+      - arg: --disable=kube-proxy
+        nodeFilters:
+          - server:*
+      - arg: --cluster-cidr=10.21.0.0/16
+        nodeFilters:
+          - server:*
+      - arg: --service-cidr=10.201.0.0/16
+        nodeFilters:
+          - server:*
+  kubeconfig:
+    updateDefaultKubeconfig: true
+    switchCurrentContext: true
