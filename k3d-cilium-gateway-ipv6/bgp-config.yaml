@@ -14,7 +14,7 @@ spec:
     peers:
     - name: "64513"
       peerASN: 64513
-      peerAddress: "2001:db8:1::1"
+      peerAddress: "2001:3200:3200::1"
       peerConfigRef:
         name: "cilium-peer"
 ---
