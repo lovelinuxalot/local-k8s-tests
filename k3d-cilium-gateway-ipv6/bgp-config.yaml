@@ -1,0 +1,56 @@
+---
+apiVersion: cilium.io/v2alpha1
+kind: CiliumBGPClusterConfig
+metadata:
+  name: cilium-bgp
+  namespace: kube-system
+spec:
+  nodeSelector:
+    matchLabels:
+      bgp_enabled: "true"
+  bgpInstances:
+  - name: "64512"
+    localASN: 64512
+    peers:
+    - name: "64513"
+      peerASN: 64513
+      peerAddress: "2001:3200:3200::1"
+      peerConfigRef:
+        name: "cilium-peer"
+---
+apiVersion: cilium.io/v2alpha1
+kind: CiliumBGPPeerConfig
+metadata:
+  namespace: kube-system
+  name: cilium-peer
+spec:
+  authSecretRef: bgp-auth-secret
+  gracefulRestart:
+    enabled: true
+    restartTimeSeconds: 15
+  families:
+    - afi: ipv6
+      safi: unicast
+      advertisements:
+        matchLabels:
+          advertise: "bgp"
+---
+apiVersion: cilium.io/v2alpha1
+kind: CiliumBGPAdvertisement
+metadata:
+  namespace: kube-system
+  name: bgp-advertisements
+  labels:
+    advertise: bgp
+spec:
+  advertisements:
+    - advertisementType: "Service"
+      service:
+        addresses:
+          - LoadBalancerIP
+      selector:
+        matchExpressions: []
+          # - { key: bgp_enabled, operator: In, values: [ "true" ] }
+      attributes:
+        communities:
+          standard: [ "64512:100" ]

@@ -1,0 +1,12 @@
+apiVersion: "cilium.io/v2alpha1"
+kind: CiliumLoadBalancerIPPool
+metadata:
+  name: "cilium-pool"
+  labels:
+    bgp: blue
+spec:
+  blocks:
+    - cidr: "2004::0/64"
+  serviceSelector:
+    matchExpressions: []
+      # - {key: bgp, operator: In, values: [blue]}
